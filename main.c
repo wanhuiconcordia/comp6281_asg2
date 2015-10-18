@@ -122,6 +122,8 @@ int main(int argc, char** argv)
                             if(pMsg){
                                 if(pMsg->type == TEXT){
                                     char *p = pMsg->data;
+                                    printf("main thread process pMsg\n");
+//                                    printMessage(pMsg);
                                     while(*p){
                                         if(*p >= 'A' && *p <= 'Z'){
                                             step1statitics[*p - 'A'].count++;
@@ -130,11 +132,13 @@ int main(int argc, char** argv)
                                         }
                                         ++p;
                                     }
+                                    //printStatistics(&step1statitics);
                                 }else if(pMsg->type == STEP1_STATISTICS){
                                     Statistics* p = (Statistics *) pMsg->data;
                                     for(int i = 0; i < pMsg->size; i++){
                                         step2statitics[p[i].letter - 'A'].count += p[i].count;
                                     }
+
                                 }else if(pMsg->type == STEP2_STATISTICS){
                                     Statistics* p = (Statistics*) pMsg->data;
                                     for(int i = 0; i < pMsg->size; i++){
@@ -194,12 +198,16 @@ int main(int argc, char** argv)
 
                             if(myRank == 0){
                                 if(shareResource1.finalStatisticFinishCount == 0){
-                                    for(unsigned i = 0; i < sizeof(step2statitics); i++){
+//                                    printStatistics(&finalStatistics);
+//                                    printStatistics(&step2statitics);
+                                    printf("sizeof(step2statitics):%d\n", sizeof(step2statitics));
+                                    for(unsigned i = 0; i < 26; i++){
                                         finalStatistics[step2statitics[i].letter - 'A'].count += step2statitics[i].count;
+//                                        printf("%d, %d\n", step2statitics[i].letter - 'A', step2statitics[i].count);
+                                        //finalStatistics[i].count = finalStatistics[i].count + step2statitics[i].count;
                                     }
 
-                                    //printStatistics(&finalStatistics);
-
+                                    printStatistics(&finalStatistics);
                                     printf("Root process received final statistics from all other process. will finishe\n");
                                     shareResource2.keepWriting = 0;
                                     while(shareResource1.isReading || shareResource2.isWriting){
@@ -244,9 +252,9 @@ int main(int argc, char** argv)
                                 }
                             }
                         }
-                        pthread_join(&writeThreadId, NULL);
+                        pthread_join(writeThreadId, NULL);
                     }
-                    pthread_join(&readThreadId, NULL);
+                    pthread_join(readThreadId, NULL);
                 }
                 pthread_mutex_destroy(&(shareResource1.mutex));
                 pthread_mutex_destroy(&(shareResource2.mutex));

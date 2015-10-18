@@ -51,7 +51,7 @@ void printMessage(Message* pMsg){
     switch(pMsg->type){
     case TEXT:
     case ERR_MSG:
-        printf("msg.type:%ud, msg.size:%d, data:%s\n", pMsg->type, pMsg->size, (char*)pMsg->data);
+        printf("msg.type:%u, msg.size:%d, data:%s\n", pMsg->type, pMsg->size, (char*)pMsg->data);
         break;
     case STEP1_STATISTICS:
     case STEP2_STATISTICS:
@@ -84,6 +84,7 @@ void* readThreadHandler(void* p)
     ShareResourceOfReadAndMainThread* pShareResource = (ShareResourceOfReadAndMainThread*) p;
 
     while(1){
+        sleep(1);
         MPI_Status status;
         if(MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status)){
             printf("MPI_Recv error.\n");
@@ -104,6 +105,7 @@ void* readThreadHandler(void* p)
                 clock_gettime(CLOCK_REALTIME, &waitInterval);
                 waitInterval.tv_sec += 2;
 
+                //printMessage(pMsg);
                 if(pthread_mutex_timedlock(&(pShareResource->mutex),&waitInterval)){
                     //if(pShareResource->rank == 0){
                     printf("child thread wait timed out. Will terminat session.\n");
@@ -236,6 +238,8 @@ void* writeThreadHandler(void* p)
         if(pMsg){
             printf("------MyRank:%d, writeThread message:%d\n", pShareResource->myRank, pMsg->type);
 //            printMessage(pMsg);
+
+//            sleep(1);
             Packet packet = {pMsg->type, pMsg->size};
             int dataBytes = pMsg->size;
             if(pMsg->type == STEP1_STATISTICS
