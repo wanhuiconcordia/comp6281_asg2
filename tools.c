@@ -194,9 +194,11 @@ void* readThreadHandler(void* p)
                    ,pShareResource->myRank, pPacket->type, pShareResource->finalStatisticFinishCount, pShareResource->statisticFinishCount, pShareResource->textFinishCount);
             if(pShareResource->myRank == 0){
                 printf("**********\n");
+
+                //IS THIS A GCCXX BUG???????????????????????????????????
                 if((pShareResource->finalStatisticFinishCount == 0)
-                        && (pShareResource->statisticFinishCount == 0)
-                        && (pShareResource->textFinishCount == 0)){
+                        /*&& (pShareResource->statisticFinishCount == 0)
+                        && (pShareResource->textFinishCount == 0)*/){
                     printf("####################\n");
                     printf("####################\n");
                     break;
